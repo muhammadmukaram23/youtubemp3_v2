@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQs - C3MP</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .hero-bg { 
+            background: #1e40af; 
+            min-height: 40vh;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition">
+                    <i class="fas fa-music text-blue-700 text-2xl"></i>
+                    <span class="text-2xl font-bold text-gray-800">C3MP</span>
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <div class="flex space-x-8">
+                        <a href="index.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-home mr-2"></i>Home
+                        </a>
+                        <a href="api.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-code mr-2"></i>API
+                        </a>
+                        <a href="faqs.html" class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
+                            <i class="fas fa-question-circle mr-2"></i>FAQs
+                        </a>
+                        <a href="changelog.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-history mr-2"></i>Changelog
+                        </a>
+                        <a href="contact.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>Contact
+                        </a>
+                    </div>
+                    <a href="index.html#support" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-full transition duration-300 flex items-center">
+                        <i class="fas fa-heart mr-2"></i>Support Us
+                    </a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-blue-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <div class="flex flex-col space-y-2">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="api.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-code mr-2"></i>API
+                    </a>
+                    <a href="faqs.html" class="text-blue-700 hover:text-blue-800 font-medium py-2 flex items-center">
+                        <i class="fas fa-question-circle mr-2"></i>FAQs
+                    </a>
+                    <a href="changelog.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-history mr-2"></i>Changelog
+                    </a>
+                    <a href="contact.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-envelope mr-2"></i>Contact
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-5xl font-bold text-white mb-4">
+                <i class="fas fa-question-circle mr-3"></i>Frequently Asked Questions
+            </h1>
+            <p class="text-xl text-gray-200 mb-8">
+                Find answers to common questions about our YouTube to MP3 converter
+            </p>
+        </div>
+    </section>
+
+    <!-- Search FAQ -->
+    <section class="py-8 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-2xl mx-auto">
+                <div class="relative">
+                    <input type="text" id="faq-search" placeholder="Search FAQs..." 
+                           class="w-full px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-700 text-lg">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Categories -->
+    <section class="py-8 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <button class="faq-category-btn active px-6 py-2 rounded-full bg-blue-700 text-white hover:bg-blue-800 transition" data-category="all">
+                        All Questions
+                    </button>
+                    <button class="faq-category-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition" data-category="general">
+                        General
+                    </button>
+                    <button class="faq-category-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition" data-category="conversion">
+                        Conversion
+                    </button>
+                    <button class="faq-category-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition" data-category="quality">
+                        Quality
+                    </button>
+                    <button class="faq-category-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition" data-category="technical">
+                        Technical
+                    </button>
+                    <button class="faq-category-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition" data-category="legal">
+                        Legal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Content -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto space-y-6">
+
+                <!-- FAQ Item 1 -->
+                <div class="bg-gray-50 rounded-lg">
+                    <button class="faq-question w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-100 transition" onclick="toggleFAQ(this)">
+                        <span>What is C3MP and how does it work?</span>
+                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                    </button>
+                    <div class="faq-answer hidden p-6 pt-0 text-gray-700">
+                        <p>C3MP is a free online service that allows you to convert YouTube videos to MP3 audio files. Simply paste a YouTube URL, select your desired audio quality, and our server will process the video and provide you with a downloadable MP3 file. The process is completely free and doesn't require any software installation.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="bg-gray-50 rounded-lg">
+                    <button class="faq-question w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-100 transition" onclick="toggleFAQ(this)">
+                        <span>Is C3MP free to use?</span>
+                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                    </button>
+                    <div class="faq-answer hidden p-6 pt-0 text-gray-700">
+                        <p>Yes, C3MP is completely free to use. There are no hidden fees, subscriptions, or premium plans. You can convert as many YouTube videos to MP3 as you want without any cost.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="bg-gray-50 rounded-lg">
+                    <button class="faq-question w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-100 transition" onclick="toggleFAQ(this)">
+                        <span>What audio quality options are available?</span>
+                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                    </button>
+                    <div class="faq-answer hidden p-6 pt-0 text-gray-700">
+                        <p>We offer four quality options:</p>
+                        <ul class="mt-2 space-y-1 list-disc list-inside">
+                            <li><strong>Low (96kbps):</strong> Smaller file size, suitable for basic listening</li>
+                            <li><strong>Medium (128kbps):</strong> Good balance between quality and file size</li>
+                            <li><strong>High (192kbps):</strong> High quality audio for music enthusiasts</li>
+                            <li><strong>Ultra (320kbps):</strong> Maximum quality for audiophiles</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="bg-gray-50 rounded-lg">
+                    <button class="faq-question w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-100 transition" onclick="toggleFAQ(this)">
+                        <span>How long does the conversion process take?</span>
+                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                    </button>
+                    <div class="faq-answer hidden p-6 pt-0 text-gray-700">
+                        <p>Conversion time depends on the video length and current server load. Most videos are converted within 1-3 minutes. Longer videos or high-quality conversions may take a bit more time. You can monitor the progress in real-time on our interface.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="bg-gray-50 rounded-lg">
+                    <button class="faq-question w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-100 transition" onclick="toggleFAQ(this)">
+                        <span>Do I need to create an account?</span>
+                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                    </button>
+                    <div class="faq-answer hidden p-6 pt-0 text-gray-700">
+                        <p>No registration or account creation is required. You can start converting YouTube videos to MP3 immediately without providing any personal information.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 6 -->
+                <div class="bg-gray-50 rounded-lg">
+                    <button class="faq-question w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-100 transition" onclick="toggleFAQ(this)">
+                        <span>Why is my conversion failing?</span>
+                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                    </button>
+                    <div class="faq-answer hidden p-6 pt-0 text-gray-700">
+                        <p>Common reasons for conversion failure include:</p>
+                        <ul class="mt-2 space-y-1 list-disc list-inside">
+                            <li>Invalid or private YouTube URL</li>
+                            <li>Video is too long (over 1 hour)</li>
+                            <li>Video has copyright restrictions</li>
+                            <li>Temporary server overload</li>
+                            <li>Network connectivity issues</li>
+                        </ul>
+                        <p class="mt-2">Try again with a different video or check your internet connection.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 7 -->
+                <div class="bg-gray-50 rounded-lg">
+                    <button class="faq-question w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-100 transition" onclick="toggleFAQ(this)">
+                        <span>Is there an API available?</span>
+                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                    </button>
+                    <div class="faq-answer hidden p-6 pt-0 text-gray-700">
+                        <p>Yes! We provide a comprehensive REST API for developers who want to integrate YouTube to MP3 conversion into their applications. Check out our <a href="api.html" class="text-purple-600 hover:underline">API documentation</a> for detailed information.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 8 -->
+                <div class="bg-gray-50 rounded-lg">
+                    <button class="faq-question w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-100 transition" onclick="toggleFAQ(this)">
+                        <span>Are there any usage limits?</span>
+                        <i class="fas fa-chevron-down transform transition-transform"></i>
+                    </button>
+                    <div class="faq-answer hidden p-6 pt-0 text-gray-700">
+                        <p>To ensure service quality for all users, we have fair usage limits:</p>
+                        <ul class="mt-2 space-y-1 list-disc list-inside">
+                            <li>Maximum 100 conversions per hour per IP address</li>
+                            <li>Maximum video length: 1 hour</li>
+                            <li>Maximum 10 concurrent conversions</li>
+                            <li>Daily download limit: 2GB per IP</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-16" style="background-color: #1E40AF;">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">Still Have Questions?</h2>
+            <p class="text-blue-100 text-lg mb-8">Can't find what you're looking for? We're here to help!</p>
+            <a href="contact.html" class="bg-white text-blue-700 font-semibold px-8 py-3 rounded-lg hover:bg-gray-100 transition">
+                <i class="fas fa-envelope mr-2"></i>Contact Support
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-music text-blue-400 text-2xl"></i>
+                        <span class="text-2xl font-bold">C3MP</span>
+                    </div>
+                    <p class="text-gray-400">The best YouTube to MP3 converter for all your music needs.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <div class="space-y-2">
+                        <a href="index.html" class="block text-gray-400 hover:text-white transition">Home</a>
+                        <a href="api.html" class="block text-gray-400 hover:text-white transition">API</a>
+                        <a href="faqs.html" class="block text-gray-400 hover:text-white transition">FAQs</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <div class="space-y-2">
+                        <a href="contact.html" class="block text-gray-400 hover:text-white transition">Contact Us</a>
+                        <a href="changelog.html" class="block text-gray-400 hover:text-white transition">Changelog</a>
+                        <a href="#" class="block text-gray-400 hover:text-white transition">Privacy Policy</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Follow Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 C3MP By Muhammad Mukaram. All rights reserved. </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Mobile menu toggle
+            $('#mobile-menu-btn').click(function() {
+                $('#mobile-menu').toggleClass('hidden');
+            });
+
+            // FAQ accordion functionality
+            $('.faq-question').click(function() {
+                const $faqItem = $(this).parent();
+                const $answer = $faqItem.find('.faq-answer');
+                const $icon = $(this).find('i');
+
+                // Toggle current item
+                $answer.slideToggle(300);
+                $icon.toggleClass('rotate-180');
+            });
+
+            // Category filtering
+            $('.faq-category-btn').click(function() {
+                const category = $(this).data('category');
+                
+                // Update active button
+                            $('.faq-category-btn').removeClass('active bg-blue-700 text-white').addClass('bg-gray-200 text-gray-700');
+            $(this).removeClass('bg-gray-200 text-gray-700').addClass('active bg-blue-700 text-white');
+
+                // Filter FAQs
+                filterFAQs(category);
+            });
+
+            // Search functionality
+            $('#faq-search').on('input', function() {
+                const searchTerm = $(this).val().toLowerCase();
+                if (searchTerm === '') {
+                    // Show all FAQs when search is empty
+                    $('.faq-item').show();
+                    $('#no-results').addClass('hidden');
+                } else {
+                    searchFAQs(searchTerm);
+                }
+            });
+
+            // Show all button
+            $('#show-all-btn').click(function() {
+                $('#faq-search').val('');
+                $('.faq-item').show();
+                $('#no-results').addClass('hidden');
+                $('.faq-category-btn[data-category="all"]').click();
+            });
+
+            function filterFAQs(category) {
+                if (category === 'all') {
+                    $('.faq-item').show();
+                } else {
+                    $('.faq-item').hide();
+                    $(`.faq-item[data-category="${category}"]`).show();
+                }
+                
+                // Check if any items are visible
+                const visibleItems = $('.faq-item:visible').length;
+                if (visibleItems === 0) {
+                    $('#no-results').removeClass('hidden');
+                } else {
+                    $('#no-results').addClass('hidden');
+                }
+            }
+
+            function searchFAQs(searchTerm) {
+                let hasResults = false;
+                
+                $('.faq-item').each(function() {
+                    const question = $(this).find('.faq-question span').text().toLowerCase();
+                    const answer = $(this).find('.faq-answer').text().toLowerCase();
+                    
+                    if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                        $(this).show();
+                        hasResults = true;
+                    } else {
+                        $(this).hide();
+                    }
+                });
+
+                if (hasResults) {
+                    $('#no-results').addClass('hidden');
+                } else {
+                    $('#no-results').removeClass('hidden');
+                }
+            }
+        });
+
+        function toggleFAQ(button) {
+            const answer = button.nextElementSibling;
+            const icon = button.querySelector('i');
+            
+            answer.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+    </script>
+</body>
+</html> 

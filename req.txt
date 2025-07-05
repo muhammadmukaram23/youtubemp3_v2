@@ -1,0 +1,47 @@
+# FastAPI and ASGI server
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+
+# YouTube downloading and processing
+yt-dlp>=2023.11.0
+
+# Audio processing (pure Python alternatives to FFmpeg)
+pydub>=0.25.0
+lameenc>=1.8.0
+
+# Async file operations
+aiofiles>=23.0.0
+
+# HTTP client for async requests
+httpx>=0.25.0
+
+# Email sending
+aiosmtplib>=2.0.0
+email-validator>=2.0.0
+
+# Data validation and serialization
+pydantic>=2.0.0
+
+# Python standard library enhancements
+python-multipart==0.0.6
+
+# Optional: For better performance and additional features
+# gunicorn==21.2.0  # Production WSGI server
+# redis==5.0.1      # For distributed task queue (if scaling)
+# celery==5.3.4     # For distributed task processing (if scaling)
+
+# Development dependencies (uncomment for development)
+# pytest==7.4.3
+# pytest-asyncio==0.21.1
+# black==23.11.0
+# flake8==6.1.0
+# mypy==1.7.1
+
+# Optional: Database support (uncomment if you want to persist tasks)
+# sqlalchemy==2.0.23
+# alembic==1.13.0
+# asyncpg==0.29.0     # PostgreSQL
+# aiomysql==0.2.0     # MySQL
+# aiosqlite==0.19.0   # SQLite
+
+itsdangerous

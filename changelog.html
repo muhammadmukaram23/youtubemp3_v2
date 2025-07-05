@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - C3MP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .hero-bg { 
+            background: #1e40af; 
+            min-height: 40vh;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition">
+                    <i class="fas fa-music text-blue-700 text-2xl"></i>
+                    <span class="text-2xl font-bold text-gray-800">C3MP</span>
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <div class="flex space-x-8">
+                        <a href="index.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-home mr-2"></i>Home
+                        </a>
+                        <a href="api.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-code mr-2"></i>API
+                        </a>
+                        <a href="faqs.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-question-circle mr-2"></i>FAQs
+                        </a>
+                        <a href="changelog.html" class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
+                            <i class="fas fa-history mr-2"></i>Changelog
+                        </a>
+                        <a href="contact.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>Contact
+                        </a>
+                    </div>
+                    <a href="index.html#support" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-full transition duration-300 flex items-center">
+                        <i class="fas fa-heart mr-2"></i>Support Us
+                    </a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-blue-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <div class="flex flex-col space-y-2">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="api.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-code mr-2"></i>API
+                    </a>
+                    <a href="faqs.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-question-circle mr-2"></i>FAQs
+                    </a>
+                    <a href="changelog.html" class="text-blue-700 hover:text-blue-800 font-medium py-2 flex items-center">
+                        <i class="fas fa-history mr-2"></i>Changelog
+                    </a>
+                    <a href="contact.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-envelope mr-2"></i>Contact
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-5xl font-bold text-white mb-4">
+                <i class="fas fa-history mr-3"></i>Changelog
+            </h1>
+            <p class="text-xl text-gray-200 mb-8">
+                Track our latest updates, improvements, and new features
+            </p>
+            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 max-w-md mx-auto">
+                <div class="flex items-center justify-center space-x-2 text-white">
+                    <span class="bg-orange-500 w-3 h-3 rounded-full"></span>
+                    <span class="font-medium">Current Version: 2.1.0</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Changelog Content -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto space-y-8">
+
+                <!-- Version 2.1.0 -->
+                <div class="bg-gray-50 rounded-lg p-8 border-l-4 border-orange-500">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">v2.1.0</span>
+                            <span class="text-orange-600 font-medium">Latest</span>
+                        </div>
+                        <span class="text-gray-500 text-sm mt-2 sm:mt-0">January 15, 2024</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Enhanced User Experience & API Improvements</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-orange-600 mb-2">
+                                <i class="fas fa-plus-circle mr-2"></i>New Features
+                            </h4>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1">
+                                <li>Added video search functionality with YouTube integration</li>
+                                <li>Introduced conversion history tracking</li>
+                                <li>New progress indicators with real-time updates</li>
+                                <li>Added video thumbnail preview before conversion</li>
+                                <li>Implemented batch download for multiple files</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-blue-600 mb-2">
+                                <i class="fas fa-arrow-up mr-2"></i>Improvements
+                            </h4>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1">
+                                <li>Enhanced mobile responsive design</li>
+                                <li>Improved conversion speed by 30%</li>
+                                <li>Better error handling and user feedback</li>
+                                <li>Updated UI with modern gradient backgrounds</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Version 2.0.3 -->
+                <div class="bg-gray-50 rounded-lg p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">v2.0.3</span>
+                        <span class="text-gray-500 text-sm mt-2 sm:mt-0">December 20, 2023</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Bug Fixes & Stability Improvements</h3>
+                    <div>
+                        <h4 class="font-semibold text-red-600 mb-2">
+                            <i class="fas fa-bug mr-2"></i>Bug Fixes
+                        </h4>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>Fixed issue with long video URLs causing conversion failures</li>
+                            <li>Resolved memory leak in the conversion process</li>
+                            <li>Fixed download button not appearing for some conversions</li>
+                            <li>Corrected audio quality selection not being applied</li>
+                            <li>Fixed mobile menu toggle issue on iOS devices</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Version 2.0.2 -->
+                <div class="bg-gray-50 rounded-lg p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">v2.0.2</span>
+                        <span class="text-gray-500 text-sm mt-2 sm:mt-0">December 10, 2023</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Performance Optimizations</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-blue-600 mb-2">
+                                <i class="fas fa-arrow-up mr-2"></i>Improvements
+                            </h4>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1">
+                                <li>Optimized server response times</li>
+                                <li>Reduced memory usage during conversion</li>
+                                <li>Improved error message clarity</li>
+                                <li>Enhanced API documentation</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-red-600 mb-2">
+                                <i class="fas fa-bug mr-2"></i>Bug Fixes
+                            </h4>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1">
+                                <li>Fixed timeout issues with very long videos</li>
+                                <li>Resolved API rate limiting false positives</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Version 2.0.1 -->
+                <div class="bg-gray-50 rounded-lg p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">v2.0.1</span>
+                        <span class="text-gray-500 text-sm mt-2 sm:mt-0">November 25, 2023</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Quick Fixes</h3>
+                    <div>
+                        <h4 class="font-semibold text-red-600 mb-2">
+                            <i class="fas fa-bug mr-2"></i>Bug Fixes
+                        </h4>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>Fixed critical bug preventing MP3 downloads</li>
+                            <li>Resolved UI layout issues on mobile devices</li>
+                            <li>Fixed YouTube Shorts URL parsing</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Version 2.0.0 -->
+                <div class="bg-gray-50 rounded-lg p-8 border-l-4 border-blue-700">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">v2.0.0</span>
+                            <span class="text-blue-700 font-medium">Major Release</span>
+                        </div>
+                        <span class="text-gray-500 text-sm mt-2 sm:mt-0">November 15, 2023</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Complete Platform Rewrite</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-green-600 mb-2">
+                                <i class="fas fa-plus-circle mr-2"></i>New Features
+                            </h4>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1">
+                                <li>Complete UI/UX redesign with modern interface</li>
+                                <li>RESTful API with comprehensive documentation</li>
+                                <li>Multiple audio quality options (96kbps to 320kbps)</li>
+                                <li>Real-time conversion progress tracking</li>
+                                <li>Support for YouTube Shorts and Music</li>
+                                <li>Playlist conversion support (API only)</li>
+                                <li>Advanced error handling and logging</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-blue-600 mb-2">
+                                <i class="fas fa-arrow-up mr-2"></i>Improvements
+                            </h4>
+                            <ul class="list-disc list-inside text-gray-700 space-y-1">
+                                <li>50% faster conversion speeds</li>
+                                <li>Improved audio quality extraction</li>
+                                <li>Enhanced mobile compatibility</li>
+                                <li>Better server stability and uptime</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">
+                    <i class="fas fa-road mr-3 text-blue-700"></i>What's Coming Next
+                </h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
+                        <i class="fas fa-list-ul text-blue-700 text-3xl mb-4"></i>
+                        <h3 class="text-lg font-semibold mb-3">Playlist Support</h3>
+                        <p class="text-gray-600">Web interface support for converting entire YouTube playlists</p>
+                        <span class="text-sm text-blue-700 font-medium">Coming in v2.2.0</span>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
+                        <i class="fas fa-user-circle text-orange-600 text-3xl mb-4"></i>
+                        <h3 class="text-lg font-semibold mb-3">User Accounts</h3>
+                        <p class="text-gray-600">Optional user accounts for conversion history and preferences</p>
+                        <span class="text-sm text-orange-600 font-medium">Coming in v2.3.0</span>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
+                        <i class="fas fa-mobile-alt text-blue-700 text-3xl mb-4"></i>
+                        <h3 class="text-lg font-semibold mb-3">Mobile App</h3>
+                        <p class="text-gray-600">Native mobile applications for iOS and Android</p>
+                        <span class="text-sm text-blue-700 font-medium">Coming in 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-music text-blue-400 text-2xl"></i>
+                        <span class="text-2xl font-bold">C3MP</span>
+                    </div>
+                    <p class="text-gray-400">The best YouTube to MP3 converter for all your music needs.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <div class="space-y-2">
+                        <a href="index.html" class="block text-gray-400 hover:text-white transition">Home</a>
+                        <a href="api.html" class="block text-gray-400 hover:text-white transition">API</a>
+                        <a href="faqs.html" class="block text-gray-400 hover:text-white transition">FAQs</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <div class="space-y-2">
+                        <a href="contact.html" class="block text-gray-400 hover:text-white transition">Contact Us</a>
+                        <a href="changelog.html" class="block text-gray-400 hover:text-white transition">Changelog</a>
+                        <a href="#" class="block text-gray-400 hover:text-white transition">Privacy Policy</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Follow Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 C3MP By Muhammad Mukaram. All rights reserved. </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html> 

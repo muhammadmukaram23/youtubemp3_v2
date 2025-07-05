@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C3MP - YouTube to MP3 Converter</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .loader {
+            border-top-color: #3498db;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @-webkit-keyframes spinner {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .hero-bg { 
+            background: #1e40af !important; 
+            min-height: 60vh !important;
+            position: relative;
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 1;
+        }
+        .hero-pattern { background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+        
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+        
+        /* Mobile responsive toast positioning */
+        @media (max-width: 640px) {
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+            
+            .toast {
+                margin-bottom: 8px;
+                padding: 12px 16px;
+            }
+            
+            .toast-title {
+                font-size: 13px;
+            }
+            
+            .toast-message {
+                font-size: 12px;
+            }
+        }
+        
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+        }
+        
+        .toast.error {
+            border-left-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fef2f2 100%);
+        }
+        
+        .toast.warning {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+        }
+        
+        .toast.info {
+            border-left-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+        }
+        
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .toast.success .toast-icon {
+            color: #10b981;
+        }
+        
+        .toast.error .toast-icon {
+            color: #ef4444;
+        }
+        
+        .toast.warning .toast-icon {
+            color: #f59e0b;
+        }
+        
+        .toast.info .toast-icon {
+            color: #3b82f6;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #374151;
+        }
+        
+        .toast-message {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 12px;
+            flex-shrink: 0;
+            transition: color 0.2s;
+        }
+        
+        .toast-close:hover {
+            color: #6b7280;
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 0 0 8px 8px;
+            transition: width linear;
+        }
+        
+        .toast.error .toast-progress {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+        
+        .toast.warning .toast-progress {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+        
+        .toast.info .toast-progress {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+        
+        /* Additional mobile responsive styles */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+            
+            /* Ensure mobile menu is properly positioned */
+            #mobile-menu {
+                background: white;
+                border-top: 1px solid #e5e7eb;
+                margin-top: 1px;
+            }
+            
+            /* Better mobile form styling */
+            input[type="text"], select {
+                font-size: 16px !important; /* Prevents zoom on iOS */
+            }
+            
+            /* Improved mobile button spacing */
+            .flex.flex-col.sm\\:flex-row button {
+                min-height: 48px; /* Better touch target */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition">
+                    <i class="fas fa-music text-blue-700 text-2xl"></i>
+                    <span class="text-2xl font-bold text-gray-800">C3MP</span>
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <div class="flex space-x-8">
+                        <a href="index.html" class="text-blue-700 hover:text-blue-800 font-medium flex items-center">
+                            <i class="fas fa-home mr-2"></i>Home
+                        </a>
+                        <a href="api.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-code mr-2"></i>API
+                        </a>
+                        <a href="faqs.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-question-circle mr-2"></i>FAQs
+                        </a>
+                        <a href="changelog.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-history mr-2"></i>Changelog
+                        </a>
+                        <a href="contact.html" class="text-gray-600 hover:text-blue-700 font-medium flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>Contact
+                        </a>
+                    </div>
+                    <a href="#support" onclick="scrollToSupport()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-full transition duration-300 flex items-center">
+                        <i class="fas fa-heart mr-2"></i>Support Us
+                    </a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-blue-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <div class="flex flex-col space-y-2">
+                    <a href="index.html" class="text-blue-700 hover:text-blue-800 font-medium py-2 flex items-center">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="api.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-code mr-2"></i>API
+                    </a>
+                    <a href="faqs.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-question-circle mr-2"></i>FAQs
+                    </a>
+                    <a href="changelog.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-history mr-2"></i>Changelog
+                    </a>
+                    <a href="contact.html" class="text-gray-600 hover:text-blue-700 font-medium py-2 flex items-center">
+                        <i class="fas fa-envelope mr-2"></i>Contact
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+          <!-- Converter Section -->
+      <section id="converter" class="py-12 sm:py-16 md:py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <!-- Reddit Section -->
+                <div class="mb-6 sm:mb-8 flex flex-col items-center">
+                    <p class="text-gray-600 text-base sm:text-lg mb-3 sm:mb-4 text-center px-4">Join our community for updates and support</p>
+                    <a href="https://reddit.com/r/C3MP" target="_blank" class="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-full text-base sm:text-lg transition duration-300 transform hover:scale-105 flex items-center justify-center max-w-xs sm:max-w-none">
+                        <i class="fab fa-reddit mr-2 sm:mr-3 text-xl sm:text-2xl"></i>
+                        <span>Join us on Reddit</span>
+                    </a>
+                </div>
+                
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8 sm:mb-12 px-4">Start Converting Now</h2>
+                
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-200 mb-6 sm:mb-8 overflow-x-auto">
+                    <button id="converter-tab" class="px-4 sm:px-6 py-3 font-medium text-blue-700 border-b-2 border-blue-700 bg-white rounded-t-lg whitespace-nowrap">
+                        <i class="fas fa-music mr-1 sm:mr-2"></i><span class="text-sm sm:text-base">MP3 Audio</span>
+                    </button>
+                    <!-- <button id="video-tab" class="px-4 sm:px-6 py-3 font-medium text-gray-500 hover:text-gray-700 bg-gray-100 rounded-t-lg ml-2 whitespace-nowrap">
+                        <i class="fas fa-video mr-1 sm:mr-2"></i><span class="text-sm sm:text-base">MP4 Video</span>
+                    </button> -->
+                    <!-- <button id="search-tab" class="px-4 sm:px-6 py-3 font-medium text-gray-500 hover:text-gray-700 bg-gray-100 rounded-t-lg ml-2 whitespace-nowrap">
+                        <i class="fas fa-search mr-1 sm:mr-2"></i><span class="text-sm sm:text-base">Search Videos</span>
+                    </button> -->
+                    <!-- <button id="history-tab" class="px-4 sm:px-6 py-3 font-medium text-gray-500 hover:text-gray-700 bg-gray-100 rounded-t-lg ml-2 whitespace-nowrap">
+                        <i class="fas fa-history mr-1 sm:mr-2"></i><span class="text-sm sm:text-base">History</span>
+                    </button> -->
+                </div>
+
+                <!-- Converter Tab Content -->
+                <div id="converter-content" class="tab-content">
+                    <!-- Converter Form -->
+                    <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+                        <div class="mb-4 sm:mb-6">
+                            <label for="youtube-url" class="block text-gray-700 font-semibold mb-2 sm:mb-3 text-base sm:text-lg">YouTube URL</label>
+                            <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..." 
+                                class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-700 text-base sm:text-lg">
+                        </div>
+                        
+                        <div class="mb-6 sm:mb-8">
+                            <label for="quality" class="block text-gray-700 font-semibold mb-2 sm:mb-3 text-base sm:text-lg">Audio Quality</label>
+                            <select id="quality" class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-700 text-base sm:text-lg">
+                                <option value="low">Low (96kbps)</option>
+                                <option value="medium" selected>Medium (128kbps)</option>
+                                <option value="high">High (192kbps)</option>
+                                <option value="ultra">Ultra (320kbps)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                            <button id="get-info-btn" class="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 font-semibold text-base sm:text-lg transition duration-300">
+                                <i class="fas fa-info-circle mr-2"></i>Get Video Info
+                            </button>
+                            <button id="convert-btn" class="w-full sm:w-auto px-6 sm:px-8 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-semibold text-base sm:text-lg transition duration-300">
+                                <i class="fas fa-exchange-alt mr-2"></i>Convert to MP3
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Video Info Section -->
+                    <div id="video-info-container" class="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 hidden">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-800">Video Information</h2>
+                        <div id="video-info" class="flex flex-col md:flex-row gap-4 sm:gap-6">
+                            <div id="thumbnail-container" class="md:w-1/3">
+                                <img id="video-thumbnail" src="" alt="Video Thumbnail" class="w-full rounded-lg shadow-md">
+                            </div>
+                            <div class="md:w-2/3">
+                                <h3 id="video-title" class="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-gray-800 break-words"></h3>
+                                <p id="video-uploader" class="text-gray-600 mb-2 flex items-center text-sm sm:text-base"><i class="fas fa-user mr-2 flex-shrink-0"></i><span class="break-words"></span></p>
+                                <p id="video-duration" class="text-gray-600 mb-2 flex items-center text-sm sm:text-base"><i class="fas fa-clock mr-2 flex-shrink-0"></i></p>
+                                <p id="video-views" class="text-gray-600 mb-3 sm:mb-4 flex items-center text-sm sm:text-base"><i class="fas fa-eye mr-2 flex-shrink-0"></i></p>
+                                <div id="video-description" class="text-xs sm:text-sm text-gray-700 max-h-24 sm:max-h-32 overflow-y-auto border-t pt-3 sm:pt-4 bg-gray-50 p-3 sm:p-4 rounded-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conversion Status Section -->
+                    <div id="conversion-status" class="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 hidden">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-800">Conversion Status</h2>
+                        <div id="status-container">
+                            <div class="flex items-center mb-4">
+                                <div id="status-icon" class="mr-3 sm:mr-4 text-xl sm:text-2xl flex-shrink-0">
+                                    <i class="fas fa-spinner fa-spin text-blue-700"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p id="status-message" class="font-semibold text-base sm:text-lg break-words">Processing...</p>
+                                    <p id="status-details" class="text-gray-600 text-sm sm:text-base break-words">Please wait while we convert your video</p>
+                                </div>
+                            </div>
+                            
+                            <div id="progress-container" class="mt-4 sm:mt-6">
+                                <div class="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
+                                    <span class="font-medium">Progress</span>
+                                    <span id="progress-percentage" class="font-medium">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                                    <div id="progress-bar" class="bg-blue-700 h-2 sm:h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div id="download-container" class="mt-6 sm:mt-8 text-center hidden">
+                                <p class="text-green-600 font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
+                                    <i class="fas fa-check-circle mr-2"></i>Download started automatically!
+                                </p>
+                                <a id="download-link" href="#" class="inline-block w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-orange-600 text-white rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-4 focus:ring-orange-300 font-semibold text-base sm:text-lg transition duration-300 transform hover:scale-105">
+                                    <i class="fas fa-download mr-2"></i>Download Again
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Tab Content -->
+                <div id="video-content" class="tab-content hidden">
+                    <!-- Video Converter Form -->
+                    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                        <div class="mb-6">
+                            <label for="youtube-url-video" class="block text-gray-700 font-semibold mb-3 text-lg">YouTube URL</label>
+                            <input type="text" id="youtube-url-video" placeholder="https://www.youtube.com/watch?v=..." 
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-700 text-lg">
+                        </div>
+                        
+                        <div class="mb-8">
+                            <label for="video-quality" class="block text-gray-700 font-semibold mb-3 text-lg">Video Quality</label>
+                            <select id="video-quality" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-700 text-lg">
+                                <option value="360p">360p - Low quality, smaller file size</option>
+                                <option value="480p">480p - Standard quality, balanced size</option>
+                                <option value="720p" selected>720p HD - High quality, larger file size</option>
+                                <option value="1080p">1080p Full HD - Ultra quality, largest file size</option>
+                                <option value="best">Best available quality</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button id="get-video-info-btn" class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 font-semibold text-lg transition duration-300">
+                                <i class="fas fa-info-circle mr-2"></i>Get Video Info
+                            </button>
+                            <button id="convert-video-btn" class="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 font-semibold text-lg transition duration-300">
+                                <i class="fas fa-video mr-2"></i>Download as MP4
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Video Info Section -->
+                    <div id="video-info-container-video" class="bg-white rounded-lg shadow-lg p-8 mb-8 hidden">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Video Information</h2>
+                        <div id="video-info-video" class="flex flex-col md:flex-row gap-6">
+                            <div id="thumbnail-container-video" class="md:w-1/3">
+                                <img id="video-thumbnail-video" src="" alt="Video Thumbnail" class="w-full rounded-lg shadow-md">
+                            </div>
+                            <div class="md:w-2/3">
+                                <h3 id="video-title-video" class="text-xl font-semibold mb-3 text-gray-800"></h3>
+                                <p id="video-uploader-video" class="text-gray-600 mb-2 flex items-center"><i class="fas fa-user mr-2"></i></p>
+                                <p id="video-duration-video" class="text-gray-600 mb-2 flex items-center"><i class="fas fa-clock mr-2"></i></p>
+                                <p id="video-views-video" class="text-gray-600 mb-4 flex items-center"><i class="fas fa-eye mr-2"></i></p>
+                                <div id="video-description-video" class="text-sm text-gray-700 max-h-32 overflow-y-auto border-t pt-4 bg-gray-50 p-4 rounded-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Conversion Status Section -->
+                    <div id="video-conversion-status" class="bg-white rounded-lg shadow-lg p-8 mb-8 hidden">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Video Download Status</h2>
+                        <div id="video-status-container">
+                            <div class="flex items-center mb-4">
+                                <div id="video-status-icon" class="mr-4 text-2xl">
+                                    <i class="fas fa-spinner fa-spin text-red-600"></i>
+                                </div>
+                                <div>
+                                    <p id="video-status-message" class="font-semibold text-lg">Processing...</p>
+                                    <p id="video-status-details" class="text-gray-600">Please wait while we download your video</p>
+                                </div>
+                            </div>
+                            
+                            <div id="video-progress-container" class="mt-6">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span class="font-medium">Progress</span>
+                                    <span id="video-progress-percentage" class="font-medium">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div id="video-progress-bar" class="bg-red-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div id="video-download-container" class="mt-8 text-center hidden">
+                                <p class="text-green-600 font-semibold mb-4">
+                                    <i class="fas fa-check-circle mr-2"></i>Download started automatically!
+                                </p>
+                                <a id="video-download-link" href="#" class="inline-block px-8 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 font-semibold text-lg transition duration-300 transform hover:scale-105">
+                                    <i class="fas fa-download mr-2"></i>Download Again
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Tab Content -->
+                <div id="search-content" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                        <div class="flex">
+                            <input type="text" id="search-query" placeholder="Search YouTube videos..." 
+                                class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-l-lg focus:outline-none focus:border-blue-700 text-lg">
+                            <button id="search-btn" class="px-6 py-3 bg-blue-700 text-white rounded-r-lg hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-semibold transition duration-300">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="search-results" class="hidden">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Search Results</h2>
+                        <div id="search-results-container" class="space-y-6">
+                            <!-- Search results will be added here dynamically -->
+                        </div>
+                    </div>
+
+                    <div id="search-loading" class="text-center py-12 hidden">
+                        <div class="inline-block loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-16 w-16"></div>
+                        <p class="mt-6 text-gray-600 text-lg">Searching videos...</p>
+                    </div>
+                </div>
+
+                <!-- History Tab Content -->
+                <div id="history-content" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Conversion History</h2>
+                        <div id="tasks-list" class="space-y-6">
+                            <!-- Tasks will be added here dynamically -->
+                            <div id="no-history" class="text-center py-12 text-gray-500">
+                                <i class="fas fa-history text-6xl mb-4"></i>
+                                <p class="text-xl">No conversion history yet</p>
+                                <p class="mt-2">Start converting videos to see your history here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="py-12 sm:py-16 md:py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8 sm:mb-12 md:mb-16">Why Choose C3MP?</h2>
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+                <div class="text-center p-4 sm:p-6">
+                    <div class="bg-blue-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <i class="fas fa-bolt text-blue-700 text-xl sm:text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Lightning Fast</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">Convert your YouTube videos to MP3 in seconds with our optimized conversion engine.</p>
+                </div>
+                <div class="text-center p-4 sm:p-6">
+                    <div class="bg-orange-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <i class="fas fa-shield-alt text-orange-600 text-xl sm:text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">100% Safe</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">No malware, no ads, no tracking. Your privacy and security are our top priority.</p>
+                </div>
+                <div class="text-center p-4 sm:p-6 sm:col-span-2 md:col-span-1">
+                    <div class="bg-blue-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <i class="fas fa-music text-blue-700 text-xl sm:text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">High Quality</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">Choose from multiple quality options up to 320kbps for the best audio experience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+  
+
+    <!-- Support Section -->
+    <section id="support" class="py-12 sm:py-16 bg-white">
+        <div class="container mx-auto px-4 text-center">
+            <div class="max-w-3xl mx-auto">
+                <div class="mb-6 sm:mb-8">
+                    <i class="fas fa-heart text-3xl sm:text-4xl text-orange-500 mb-3 sm:mb-4"></i>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">Support C3MP</h2>
+                    <p class="text-gray-600 text-base sm:text-lg px-4">
+                        Help us keep C3MP free and improve our service for everyone
+                    </p>
+                </div>
+                
+                <div class="mb-6 sm:mb-8">
+                    <a href="https://ko-fi.com/redditdownloader" target="_blank" class="inline-block w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 sm:py-6 px-8 sm:px-12 rounded-lg shadow-lg transform hover:scale-105 transition duration-300 max-w-sm sm:max-w-none mx-auto">
+                        <i class="fas fa-coffee text-2xl sm:text-3xl mb-2 sm:mb-3 block"></i>
+                        <span class="text-lg sm:text-xl block">Buy me a coffee</span>
+                        <span class="text-xs sm:text-sm opacity-75 block mt-1">Support our work</span>
+                    </a>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 sm:p-6">
+                    <div class="flex items-center justify-center text-gray-600 mb-3 sm:mb-4">
+                        <i class="fas fa-heart mr-2"></i>
+                        <span class="font-medium text-sm sm:text-base">Secure payments powered by Ko-fi</span>
+                    </div>
+                    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500">
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-server mr-2 text-blue-700 flex-shrink-0"></i>
+                            <span>Server maintenance</span>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-code mr-2 text-orange-500 flex-shrink-0"></i>
+                            <span>New features</span>
+                        </div>
+                        <div class="flex items-center justify-center sm:col-span-2 md:col-span-1">
+                            <i class="fas fa-headset mr-2 text-blue-700 flex-shrink-0"></i>
+                            <span>24/7 support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-12 sm:py-16 md:py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
+                <div class="p-4">
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">1M+</div>
+                    <div class="text-gray-600 text-xs sm:text-sm md:text-base">Videos Converted</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">500K+</div>
+                    <div class="text-gray-600 text-xs sm:text-sm md:text-base">Happy Users</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">99.9%</div>
+                    <div class="text-gray-600 text-xs sm:text-sm md:text-base">Uptime</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">24/7</div>
+                    <div class="text-gray-600 text-xs sm:text-sm md:text-base">Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-music text-blue-400 text-2xl"></i>
+                        <span class="text-2xl font-bold">C3MP</span>
+                    </div>
+                    <p class="text-gray-400">The best YouTube to MP3 converter for all your music needs.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <div class="space-y-2">
+                        <a href="index.html" class="block text-gray-400 hover:text-white transition">Home</a>
+                        <a href="api.html" class="block text-gray-400 hover:text-white transition">API</a>
+                        <a href="faqs.html" class="block text-gray-400 hover:text-white transition">FAQs</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <div class="space-y-2">
+                        <a href="contact.html" class="block text-gray-400 hover:text-white transition">Contact Us</a>
+                        <a href="changelog.html" class="block text-gray-400 hover:text-white transition">Changelog</a>
+                        <a href="#" class="block text-gray-400 hover:text-white transition">Privacy Policy</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Follow Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl transition"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 C3MP By Muhammad Mukaram. All rights reserved. </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        $('#mobile-menu-btn').click(function() {
+            $('#mobile-menu').toggleClass('hidden');
+        });
+
+
+
+        // Smooth scroll to support section
+        function scrollToSupport() {
+            document.getElementById('support').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        $(document).ready(function() {
+            // Use current origin as API base URL since we're serving from the same server
+        const API_BASE_URL = window.location.origin;
+            let currentTaskId = null;
+            let statusCheckInterval = null;
+
+            // Toast Notification System
+            function showToast(type, title, message, duration = 5000) {
+                const toastContainer = document.getElementById('toastContainer');
+                const toastId = 'toast-' + Date.now();
+                
+                // Icon mapping
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    warning: 'fas fa-exclamation-triangle',
+                    info: 'fas fa-info-circle'
+                };
+                
+                // Create toast element
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.id = toastId;
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" onclick="removeToast('${toastId}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress" style="width: 100%; animation: shrink ${duration}ms linear;"></div>
+                `;
+                
+                // Add CSS animation for progress bar
+                if (!document.getElementById('toast-animations')) {
+                    const style = document.createElement('style');
+                    style.id = 'toast-animations';
+                    style.textContent = `
+                        @keyframes shrink {
+                            from { width: 100%; }
+                            to { width: 0%; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Add to container
+                toastContainer.appendChild(toast);
+                
+                // Trigger show animation
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 100);
+                
+                // Auto remove after duration
+                setTimeout(() => {
+                    removeToast(toastId);
+                }, duration);
+                
+                return toastId;
+            }
+            
+            // Make removeToast globally accessible
+            window.removeToast = function(toastId) {
+                const toast = document.getElementById(toastId);
+                if (toast) {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }
+            }
+            
+            // Helper functions for different toast types
+            function showSuccess(title, message, duration) {
+                return showToast('success', title, message, duration);
+            }
+            
+            function showError(title, message, duration) {
+                return showToast('error', title, message, duration);
+            }
+            
+            function showWarning(title, message, duration) {
+                return showToast('warning', title, message, duration);
+            }
+            
+            function showInfo(title, message, duration) {
+                return showToast('info', title, message, duration);
+            }
+
+            // Tab switching
+            $('#converter-tab').click(function() {
+                $('.tab-content').addClass('hidden');
+                $('#converter-content').removeClass('hidden');
+                $('.flex.border-b button').removeClass('text-blue-700 border-b-2 border-blue-700 bg-white').addClass('text-gray-500 bg-gray-100');
+                $(this).removeClass('text-gray-500 bg-gray-100').addClass('text-blue-700 border-b-2 border-blue-700 bg-white');
+            });
+
+            $('#video-tab').click(function() {
+                $('.tab-content').addClass('hidden');
+                $('#video-content').removeClass('hidden');
+                $('.flex.border-b button').removeClass('text-blue-700 border-b-2 border-blue-700 bg-white').addClass('text-gray-500 bg-gray-100');
+                $(this).removeClass('text-gray-500 bg-gray-100').addClass('text-blue-700 border-b-2 border-blue-700 bg-white');
+            });
+
+            $('#search-tab').click(function() {
+                $('.tab-content').addClass('hidden');
+                $('#search-content').removeClass('hidden');
+                $('.flex.border-b button').removeClass('text-blue-700 border-b-2 border-blue-700 bg-white').addClass('text-gray-500 bg-gray-100');
+                $(this).removeClass('text-gray-500 bg-gray-100').addClass('text-blue-700 border-b-2 border-blue-700 bg-white');
+            });
+
+            $('#history-tab').click(function() {
+                $('.tab-content').addClass('hidden');
+                $('#history-content').removeClass('hidden');
+                $('.flex.border-b button').removeClass('text-blue-700 border-b-2 border-blue-700 bg-white').addClass('text-gray-500 bg-gray-100');
+                $(this).removeClass('text-gray-500 bg-gray-100').addClass('text-blue-700 border-b-2 border-blue-700 bg-white');
+                loadRecentTasks();
+            });
+
+            // Get Video Info Button Click
+            $('#get-info-btn').click(function() {
+                const youtubeUrl = $('#youtube-url').val().trim();
+                if (!youtubeUrl) {
+                    showWarning('Missing URL', 'Please enter a YouTube URL');
+                    return;
+                }
+
+                // Show loading state
+                $('#get-info-btn').html('<i class="fas fa-spinner fa-spin mr-2"></i>Loading...');
+                $('#get-info-btn').prop('disabled', true);
+                
+                // Get video info from API
+                $.ajax({
+                    url: `${API_BASE_URL}/video-info?url=${encodeURIComponent(youtubeUrl)}`,
+                    method: 'GET',
+                    success: function(data) {
+                        displayVideoInfo(data);
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Failed to get video information';
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            errorMsg = xhr.responseJSON.detail;
+                        }
+                        showError('Video Info Error', errorMsg);
+                    },
+                    complete: function() {
+                        $('#get-info-btn').html('<i class="fas fa-info-circle mr-2"></i>Get Video Info');
+                        $('#get-info-btn').prop('disabled', false);
+                    }
+                });
+            });
+
+            // Convert Button Click
+            $('#convert-btn').click(function() {
+                const youtubeUrl = $('#youtube-url').val().trim();
+                const quality = $('#quality').val();
+                
+                if (!youtubeUrl) {
+                    showWarning('Missing URL', 'Please enter a YouTube URL');
+                    return;
+                }
+
+                // Reset download trigger
+                window.downloadTriggered = false;
+
+                // Show loading state
+                $('#convert-btn').html('<i class="fas fa-spinner fa-spin mr-2"></i>Converting...');
+                $('#convert-btn').prop('disabled', true);
+                
+                // Send conversion request to API
+                $.ajax({
+                    url: `${API_BASE_URL}/convert`,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        url: youtubeUrl,
+                        quality: quality
+                    }),
+                    success: function(data) {
+                        currentTaskId = data.task_id;
+                        showConversionStatus(data);
+                        startStatusCheck(data.task_id);
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Failed to start conversion';
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            errorMsg = xhr.responseJSON.detail;
+                        }
+                        showError('Conversion Error', errorMsg);
+                        $('#convert-btn').html('<i class="fas fa-exchange-alt mr-2"></i>Convert to MP3');
+                        $('#convert-btn').prop('disabled', false);
+                    }
+                });
+            });
+
+            // Get Video Info Button Click (for video tab)
+            $('#get-video-info-btn').click(function() {
+                const youtubeUrl = $('#youtube-url-video').val().trim();
+                if (!youtubeUrl) {
+                    showWarning('Missing URL', 'Please enter a YouTube URL');
+                    return;
+                }
+
+                // Show loading state
+                $('#get-video-info-btn').html('<i class="fas fa-spinner fa-spin mr-2"></i>Loading...');
+                $('#get-video-info-btn').prop('disabled', true);
+                
+                // Get video info from API
+                $.ajax({
+                    url: `${API_BASE_URL}/video-info?url=${encodeURIComponent(youtubeUrl)}`,
+                    method: 'GET',
+                    success: function(data) {
+                        displayVideoInfoForVideo(data);
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Failed to get video information';
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            errorMsg = xhr.responseJSON.detail;
+                        }
+                        showError('Video Info Error', errorMsg);
+                    },
+                    complete: function() {
+                        $('#get-video-info-btn').html('<i class="fas fa-info-circle mr-2"></i>Get Video Info');
+                        $('#get-video-info-btn').prop('disabled', false);
+                    }
+                });
+            });
+
+            // Convert Video Button Click
+            $('#convert-video-btn').click(function() {
+                const youtubeUrl = $('#youtube-url-video').val().trim();
+                const quality = $('#video-quality').val();
+                
+                if (!youtubeUrl) {
+                    showWarning('Missing URL', 'Please enter a YouTube URL');
+                    return;
+                }
+
+                // Reset download trigger
+                window.videoDownloadTriggered = false;
+
+                // Show loading state
+                $('#convert-video-btn').html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
+                $('#convert-video-btn').prop('disabled', true);
+                
+                // Send video conversion request to API
+                $.ajax({
+                    url: `${API_BASE_URL}/convert-video`,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        url: youtubeUrl,
+                        quality: quality
+                    }),
+                    success: function(data) {
+                        currentTaskId = data.task_id;
+                        showVideoConversionStatus(data);
+                        startVideoStatusCheck(data.task_id);
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Failed to start video download';
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            errorMsg = xhr.responseJSON.detail;
+                        }
+                        showError('Video Download Error', errorMsg);
+                        $('#convert-video-btn').html('<i class="fas fa-video mr-2"></i>Download as MP4');
+                        $('#convert-video-btn').prop('disabled', false);
+                    }
+                });
+            });
+
+            // Search Button Click
+            $('#search-btn').click(function() {
+                const query = $('#search-query').val().trim();
+                if (!query) {
+                    showWarning('Missing Query', 'Please enter a search query');
+                    return;
+                }
+
+                // Show loading state
+                $('#search-results').addClass('hidden');
+                $('#search-loading').removeClass('hidden');
+                $('#search-btn').prop('disabled', true);
+                
+                // Search videos from API
+                $.ajax({
+                    url: `${API_BASE_URL}/search?query=${encodeURIComponent(query)}&max_results=10`,
+                    method: 'GET',
+                    success: function(data) {
+                        displaySearchResults(data);
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Failed to search videos';
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            errorMsg = xhr.responseJSON.detail;
+                        }
+                        showError('Search Error', errorMsg);
+                    },
+                    complete: function() {
+                        $('#search-loading').addClass('hidden');
+                        $('#search-btn').prop('disabled', false);
+                    }
+                });
+            });
+
+            // Enter key for search
+            $('#search-query').keypress(function(e) {
+                if (e.which === 13) {
+                    $('#search-btn').click();
+                }
+            });
+
+            // Display video information
+            function displayVideoInfo(data) {
+                $('#video-title').text(data.title);
+                $('#video-uploader').text(`By: ${data.uploader}`);
+                
+                // Format duration from seconds to MM:SS
+                const minutes = Math.floor(data.duration / 60);
+                const seconds = data.duration % 60;
+                $('#video-duration').text(`Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+                
+                // Format view count with commas
+                const formattedViews = data.view_count.toLocaleString();
+                $('#video-views').text(`Views: ${formattedViews}`);
+                
+                $('#video-thumbnail').attr('src', data.thumbnail);
+                $('#video-description').text(data.description);
+                
+                // Show the video info container
+                $('#video-info-container').removeClass('hidden');
+            }
+
+            // Display video information for video tab
+            function displayVideoInfoForVideo(data) {
+                $('#video-title-video').text(data.title);
+                $('#video-uploader-video').text(`By: ${data.uploader}`);
+                
+                // Format duration from seconds to MM:SS
+                const minutes = Math.floor(data.duration / 60);
+                const seconds = data.duration % 60;
+                $('#video-duration-video').text(`Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+                
+                // Format view count with commas
+                const formattedViews = data.view_count.toLocaleString();
+                $('#video-views-video').text(`Views: ${formattedViews}`);
+                
+                $('#video-thumbnail-video').attr('src', data.thumbnail);
+                $('#video-description-video').text(data.description);
+                
+                // Show the video info container
+                $('#video-info-container-video').removeClass('hidden');
+            }
+
+            // Display search results
+            function displaySearchResults(data) {
+                $('#search-results-container').empty();
+                
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(function(video) {
+                        const videoElement = createSearchResultElement(video);
+                        $('#search-results-container').append(videoElement);
+                    });
+                } else {
+                    $('#search-results-container').html('<p class="text-center py-4 text-gray-500">No results found</p>');
+                }
+                
+                $('#search-results').removeClass('hidden');
+            }
+
+            // Create search result element
+            function createSearchResultElement(video) {
+                // Format duration from seconds to MM:SS if available
+                let durationText = '';
+                if (video.duration) {
+                    const minutes = Math.floor(video.duration / 60);
+                    const seconds = video.duration % 60;
+                    durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:shadow-md">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="sm:w-1/3 relative">
+                                <img src="${video.thumbnail || 'https://via.placeholder.com/480x360.png?text=No+Thumbnail'}" 
+                                     alt="${video.title}" class="w-full h-auto rounded-md">
+                                ${durationText ? `<span class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded">${durationText}</span>` : ''}
+                            </div>
+                            <div class="sm:w-2/3">
+                                <h3 class="font-medium text-lg truncate-2">${video.title}</h3>
+                                <p class="text-gray-600 text-sm mb-2">${video.uploader || 'Unknown uploader'}</p>
+                                <div class="flex space-x-2 mt-4">
+                                    <button class="convert-search-result px-3 py-1 bg-blue-700 text-white text-sm rounded hover:bg-blue-800" 
+                                            data-url="https://www.youtube.com/watch?v=${video.id}">
+                                        <i class="fas fa-music mr-1"></i> MP3
+                                    </button>
+                                    <button class="convert-video-search-result px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700" 
+                                            data-url="https://www.youtube.com/watch?v=${video.id}">
+                                        <i class="fas fa-video mr-1"></i> MP4
+                                    </button>
+                                    <a href="https://www.youtube.com/watch?v=${video.id}" target="_blank" 
+                                       class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">
+                                        <i class="fab fa-youtube mr-1"></i> Watch
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Convert search result
+            $(document).on('click', '.convert-search-result', function() {
+                const url = $(this).data('url');
+                $('#youtube-url').val(url);
+                $('#converter-tab').click();
+                $('#get-info-btn').click();
+            });
+
+            // Convert video search result
+            $(document).on('click', '.convert-video-search-result', function() {
+                const url = $(this).data('url');
+                $('#youtube-url-video').val(url);
+                $('#video-tab').click();
+                $('#get-video-info-btn').click();
+            });
+
+            // Show conversion status
+            function showConversionStatus(data) {
+                $('#status-message').text(data.status.charAt(0).toUpperCase() + data.status.slice(1));
+                $('#status-details').text(data.message);
+                $('#progress-percentage').text('0%');
+                $('#progress-bar').css('width', '0%');
+                $('#download-container').addClass('hidden');
+                $('#conversion-status').removeClass('hidden');
+            }
+
+            // Show video conversion status
+            function showVideoConversionStatus(data) {
+                $('#video-status-message').text(data.status.charAt(0).toUpperCase() + data.status.slice(1));
+                $('#video-status-details').text(data.message);
+                $('#video-progress-percentage').text('0%');
+                $('#video-progress-bar').css('width', '0%');
+                $('#video-download-container').addClass('hidden');
+                $('#video-conversion-status').removeClass('hidden');
+            }
+
+            // Start checking task status
+            function startStatusCheck(taskId) {
+                // Clear any existing interval
+                if (statusCheckInterval) {
+                    clearInterval(statusCheckInterval);
+                }
+                
+                // Check status every 1 second for faster updates
+                statusCheckInterval = setInterval(function() {
+                    checkTaskStatus(taskId);
+                }, 1000);
+            }
+
+            // Start checking video task status
+            function startVideoStatusCheck(taskId) {
+                // Clear any existing interval
+                if (statusCheckInterval) {
+                    clearInterval(statusCheckInterval);
+                }
+                
+                // Check status every 1 second for faster updates
+                statusCheckInterval = setInterval(function() {
+                    checkVideoTaskStatus(taskId);
+                }, 1000);
+            }
+
+            // Check task status
+            function checkTaskStatus(taskId) {
+                $.ajax({
+                    url: `${API_BASE_URL}/task/${taskId}`,
+                    method: 'GET',
+                    success: function(data) {
+                        updateStatusUI(data);
+                        
+                        // If task is completed or failed, stop checking
+                        if (data.status === 'completed' || data.status === 'failed') {
+                            clearInterval(statusCheckInterval);
+                            $('#convert-btn').html('<i class="fas fa-exchange-alt mr-2"></i>Convert to MP3');
+                            $('#convert-btn').prop('disabled', false);
+                        }
+                    },
+                    error: function(xhr) {
+                        clearInterval(statusCheckInterval);
+                        
+                        // Don't show error toasts if cleanup has been executed
+                        if (cleanupExecuted) {
+                            return;
+                        }
+                        
+                        $('#status-message').text('Error');
+                        let errorMsg = 'Failed to check conversion status';
+                        if (xhr.status === 404) {
+                            errorMsg = 'Task not found. The download may have been cleaned up or failed to start.';
+                        } else if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            errorMsg = xhr.responseJSON.detail;
+                        }
+                        $('#status-details').text(errorMsg);
+                        showError('Status Check Failed', errorMsg);
+                        $('#convert-btn').html('<i class="fas fa-exchange-alt mr-2"></i>Convert to MP3');
+                        $('#convert-btn').prop('disabled', false);
+                    }
+                });
+            }
+
+            // Check video task status
+            function checkVideoTaskStatus(taskId) {
+                $.ajax({
+                    url: `${API_BASE_URL}/task/${taskId}`,
+                    method: 'GET',
+                    success: function(data) {
+                        updateVideoStatusUI(data);
+                        
+                        // If task is completed or failed, stop checking
+                        if (data.status === 'completed' || data.status === 'failed') {
+                            clearInterval(statusCheckInterval);
+                            $('#convert-video-btn').html('<i class="fas fa-video mr-2"></i>Download as MP4');
+                            $('#convert-video-btn').prop('disabled', false);
+                        }
+                    },
+                    error: function(xhr) {
+                        clearInterval(statusCheckInterval);
+                        
+                        // Don't show error toasts if cleanup has been executed
+                        if (cleanupExecuted) {
+                            return;
+                        }
+                        
+                        $('#video-status-message').text('Error');
+                        let errorMsg = 'Failed to check video download status';
+                        if (xhr.status === 404) {
+                            errorMsg = 'Task not found. The download may have been cleaned up or failed to start.';
+                        } else if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            errorMsg = xhr.responseJSON.detail;
+                        }
+                        $('#video-status-details').text(errorMsg);
+                        showError('Video Status Check Failed', errorMsg);
+                        $('#convert-video-btn').html('<i class="fas fa-video mr-2"></i>Download as MP4');
+                        $('#convert-video-btn').prop('disabled', false);
+                    }
+                });
+            }
+
+            // Update status UI
+            function updateStatusUI(data) {
+                // Update status message
+                $('#status-message').text(data.status.charAt(0).toUpperCase() + data.status.slice(1));
+                $('#status-details').text(data.message);
+                
+                // Update progress bar
+                const progressPercent = Math.round(data.progress);
+                $('#progress-percentage').text(`${progressPercent}%`);
+                $('#progress-bar').css('width', `${progressPercent}%`);
+                
+                // Update status icon and handle different statuses
+                if (data.status === 'completed') {
+                    $('#status-icon').html('<i class="fas fa-check-circle text-orange-600"></i>');
+                    
+                    // Check if download_url exists
+                    if (data.download_url) {
+                        $('#download-link').attr('href', `${API_BASE_URL}${data.download_url}`);
+                        $('#download-container').removeClass('hidden');
+                        
+                        // Automatically trigger download only once
+                        if (!window.downloadTriggered) {
+                            window.downloadTriggered = true;
+                            showSuccess('Download Complete', 'Your file is being downloaded automatically!');
+                            setTimeout(() => {
+                                // Try direct link first, then fallback to blob download
+                                const downloadUrl = `${API_BASE_URL}${data.download_url}`;
+                                
+                                // Method 1: Try direct download link
+                                try {
+                                    const a = document.createElement('a');
+                                    a.href = downloadUrl;
+                                    a.download = ''; // Let browser determine filename
+                                    a.style.display = 'none';
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    console.log('Direct download triggered successfully');
+                                } catch (directError) {
+                                    console.log('Direct download failed, trying blob method:', directError);
+                                    
+                                    // Method 2: Fallback to blob download
+                                    $.ajax({
+                                        url: downloadUrl,
+                                        method: 'GET',
+                                        xhrFields: {
+                                            responseType: 'blob'
+                                        },
+                                        timeout: 30000, // 30 second timeout
+                                        success: function(blobData, status, xhr) {
+                                            try {
+                                                // Create download link
+                                                const blob = new Blob([blobData]);
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                
+                                                // Extract filename from Content-Disposition header
+                                                let filename = 'download.mp3';
+                                                const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                                                console.log('Content-Disposition header:', contentDisposition);
+                                                if (contentDisposition) {
+                                                    // Try different patterns for filename extraction
+                                                    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                                                    if (filenameMatch && filenameMatch[1]) {
+                                                        filename = filenameMatch[1].replace(/['"]/g, '');
+                                                    }
+                                                }
+                                                console.log('Extracted filename:', filename);
+                                                
+                                                a.download = filename;
+                                                a.style.display = 'none';
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                document.body.removeChild(a);
+                                                window.URL.revokeObjectURL(url);
+                                                console.log('Blob download completed successfully');
+                                            } catch (blobError) {
+                                                console.error('Blob processing failed:', blobError);
+                                                showError('Auto-download Failed', 'Automatic download failed, but you can still click the download button.');
+                                            }
+                                        },
+                                        error: function(xhr, textStatus, errorThrown) {
+                                            console.error('Auto-download failed:', {
+                                                status: xhr.status,
+                                                statusText: xhr.statusText,
+                                                textStatus: textStatus,
+                                                errorThrown: errorThrown,
+                                                responseText: xhr.responseText
+                                            });
+                                            
+                                            let errorMsg = 'Automatic download failed, but you can still click the download button.';
+                                            if (xhr.status === 404) {
+                                                errorMsg = 'File not found. The download may have expired.';
+                                            } else if (xhr.status === 0) {
+                                                errorMsg = 'Network error. Please check your connection and try the download button.';
+                                            }
+                                            
+                                            showError('Auto-download Failed', errorMsg);
+                                        }
+                                    });
+                                }
+                            }, 1000);
+                        }
+                    } else {
+                        console.error('No download_url in response:', data);
+                        showError('Download Error', 'Download URL not available. Please try again.');
+                    }
+
+                } else if (data.status === 'failed') {
+                    $('#status-icon').html('<i class="fas fa-times-circle text-red-500"></i>');
+                    // Show error details if available
+                    if (data.error) {
+                        $('#status-details').text(`Error: ${data.error}`);
+                        showError('Download Failed', data.error);
+                    }
+                } else {
+                    $('#status-icon').html('<i class="fas fa-spinner fa-spin text-blue-700"></i>');
+                }
+            }
+
+            // Update video status UI
+            function updateVideoStatusUI(data) {
+                // Update status message
+                $('#video-status-message').text(data.status.charAt(0).toUpperCase() + data.status.slice(1));
+                $('#video-status-details').text(data.message);
+                
+                // Update progress bar
+                const progressPercent = Math.round(data.progress);
+                $('#video-progress-percentage').text(`${progressPercent}%`);
+                $('#video-progress-bar').css('width', `${progressPercent}%`);
+                
+                // Update status icon
+                if (data.status === 'completed') {
+                    $('#video-status-icon').html('<i class="fas fa-check-circle text-red-600"></i>');
+                    
+                    // Check if download_url exists
+                    if (data.download_url) {
+                        $('#video-download-link').attr('href', `${API_BASE_URL}${data.download_url}`);
+                        $('#video-download-container').removeClass('hidden');
+                        
+                        // Automatically trigger download only once
+                        if (!window.videoDownloadTriggered) {
+                            window.videoDownloadTriggered = true;
+                            showSuccess('Download Complete', 'Your video is being downloaded automatically!');
+                            setTimeout(() => {
+                                // Try direct link first, then fallback to blob download
+                                const downloadUrl = `${API_BASE_URL}${data.download_url}`;
+                                
+                                // Method 1: Try direct download link
+                                try {
+                                    const a = document.createElement('a');
+                                    a.href = downloadUrl;
+                                    a.download = ''; // Let browser determine filename
+                                    a.style.display = 'none';
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    console.log('Direct video download triggered successfully');
+                                } catch (directError) {
+                                    console.log('Direct video download failed, trying blob method:', directError);
+                                    
+                                    // Method 2: Fallback to blob download
+                                    $.ajax({
+                                        url: downloadUrl,
+                                        method: 'GET',
+                                        xhrFields: {
+                                            responseType: 'blob'
+                                        },
+                                        timeout: 30000, // 30 second timeout
+                                        success: function(blobData, status, xhr) {
+                                            try {
+                                                // Create download link
+                                                const blob = new Blob([blobData]);
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                
+                                                // Extract filename from Content-Disposition header
+                                                let filename = 'download.mp4';
+                                                const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                                                console.log('Video Content-Disposition header:', contentDisposition);
+                                                if (contentDisposition) {
+                                                    // Try different patterns for filename extraction
+                                                    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                                                    if (filenameMatch && filenameMatch[1]) {
+                                                        filename = filenameMatch[1].replace(/['"]/g, '');
+                                                    }
+                                                }
+                                                console.log('Video extracted filename:', filename);
+                                                
+                                                a.download = filename;
+                                                a.style.display = 'none';
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                document.body.removeChild(a);
+                                                window.URL.revokeObjectURL(url);
+                                                console.log('Video blob download completed successfully');
+                                            } catch (blobError) {
+                                                console.error('Video blob processing failed:', blobError);
+                                                showError('Auto-download Failed', 'Automatic download failed, but you can still click the download button.');
+                                            }
+                                        },
+                                        error: function(xhr, textStatus, errorThrown) {
+                                            console.error('Video auto-download failed:', {
+                                                status: xhr.status,
+                                                statusText: xhr.statusText,
+                                                textStatus: textStatus,
+                                                errorThrown: errorThrown,
+                                                responseText: xhr.responseText
+                                            });
+                                            
+                                            let errorMsg = 'Automatic download failed, but you can still click the download button.';
+                                            if (xhr.status === 404) {
+                                                errorMsg = 'File not found. The download may have expired.';
+                                            } else if (xhr.status === 0) {
+                                                errorMsg = 'Network error. Please check your connection and try the download button.';
+                                            }
+                                            
+                                            showError('Auto-download Failed', errorMsg);
+                                        }
+                                    });
+                                }
+                            }, 1000);
+                        }
+                    } else {
+                        console.error('No download_url in video response:', data);
+                        showError('Download Error', 'Download URL not available. Please try again.');
+                    }
+                } else if (data.status === 'failed') {
+                    $('#video-status-icon').html('<i class="fas fa-times-circle text-red-500"></i>');
+                } else {
+                    $('#video-status-icon').html('<i class="fas fa-spinner fa-spin text-red-600"></i>');
+                }
+            }
+
+            // Load recent tasks
+            function loadRecentTasks() {
+                $.ajax({
+                    url: `${API_BASE_URL}/tasks?limit=10`,
+                    method: 'GET',
+                    success: function(data) {
+                        $('#tasks-list').empty();
+                        
+                        if (data.tasks && data.tasks.length > 0) {
+                            data.tasks.forEach(function(task) {
+                                const taskElement = createTaskElement(task);
+                                $('#tasks-list').append(taskElement);
+                            });
+                            $('#no-history').hide();
+                        } else {
+                            $('#tasks-list').append($('#no-history'));
+                            $('#no-history').show();
+                        }
+                    },
+                    error: function() {
+                        $('#tasks-list').html('<p class="text-center py-4 text-red-500">Failed to load history</p>');
+                    }
+                });
+            }
+
+            // Create task element
+            function createTaskElement(task) {
+                const statusClass = task.status === 'completed' ? 'text-orange-600' : 
+                                   task.status === 'failed' ? 'text-red-500' : 'text-blue-700';
+                
+                const statusIcon = task.status === 'completed' ? 'fa-check-circle' : 
+                                  task.status === 'failed' ? 'fa-times-circle' : 'fa-spinner fa-spin';
+                
+                // Show appropriate button based on task status
+                let actionBtn = '';
+                if (task.status === 'completed' && task.download_url) {
+                    actionBtn = `<a href="${API_BASE_URL}${task.download_url}" class="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700">
+                        <i class="fas fa-download mr-1"></i> Download
+                    </a>`;
+                }
+                
+                const deleteBtn = 
+                    `<button class="delete-task px-3 py-1 bg-red-100 text-red-600 text-sm rounded hover:bg-red-200" data-task-id="${task.task_id}">
+                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                    </button>`;
+                
+                // Format date
+                const createdDate = new Date(task.created_at);
+                const formattedDate = createdDate.toLocaleString();
+                
+                // Show file status
+                let statusText = `Quality: ${task.quality || 'Unknown'} | Status: ${task.status}`;
+                
+                return `
+                    <div class="bg-white border rounded-md p-4 hover:shadow-sm transition-shadow">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center">
+                                <i class="fas ${statusIcon} ${statusClass} mr-2"></i>
+                                <span class="font-medium truncate max-w-xs">${task.title || task.url || 'Unknown title'}</span>
+                            </div>
+                            <span class="text-xs text-gray-500">${formattedDate}</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-3">
+                            ${statusText}
+                        </div>
+                        <div class="flex space-x-2">
+                            ${actionBtn}
+                            ${deleteBtn}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Handle download link clicks with error handling
+            $(document).on('click', '#download-link', function(e) {
+                e.preventDefault();
+                const href = $(this).attr('href');
+                if (href && href !== '#') {
+                    // Method 1: Try direct download first
+                    try {
+                        const a = document.createElement('a');
+                        a.href = href;
+                        a.download = ''; // Let browser determine filename
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        console.log('Manual direct download triggered successfully');
+                    } catch (directError) {
+                        console.log('Manual direct download failed, trying blob method:', directError);
+                        
+                        // Method 2: Fallback to blob download
+                        $.ajax({
+                            url: href,
+                            method: 'GET',
+                            xhrFields: {
+                                responseType: 'blob'
+                            },
+                            timeout: 30000,
+                            success: function(data, status, xhr) {
+                                try {
+                                    // Create download link
+                                    const blob = new Blob([data]);
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    
+                                    // Extract filename from Content-Disposition header
+                                    let filename = 'download.mp3';
+                                    const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                                    console.log('Manual download Content-Disposition header:', contentDisposition);
+                                    if (contentDisposition) {
+                                        // Try different patterns for filename extraction
+                                        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                                        if (filenameMatch && filenameMatch[1]) {
+                                            filename = filenameMatch[1].replace(/['"]/g, '');
+                                        }
+                                    }
+                                    console.log('Manual download extracted filename:', filename);
+                                    
+                                    a.download = filename;
+                                    a.style.display = 'none';
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
+                                    console.log('Manual blob download completed successfully');
+                                } catch (blobError) {
+                                    console.error('Manual blob processing failed:', blobError);
+                                    showError('Download Failed', 'Failed to process the downloaded file.');
+                                }
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                console.error('Manual download failed:', {
+                                    status: xhr.status,
+                                    statusText: xhr.statusText,
+                                    textStatus: textStatus,
+                                    errorThrown: errorThrown
+                                });
+                                
+                                let errorMsg = 'Failed to download the file. Please try again.';
+                                if (xhr.status === 404) {
+                                    errorMsg = 'File not found. The download may have expired.';
+                                } else if (xhr.status === 0) {
+                                    errorMsg = 'Network error. Please check your connection.';
+                                }
+                                
+                                showError('Download Failed', errorMsg);
+                            }
+                        });
+                    }
+                }
+            });
+
+
+
+            // Delete task
+            $(document).on('click', '.delete-task', function() {
+                const taskId = $(this).data('task-id');
+                if (confirm('Are you sure you want to delete this task?')) {
+                    $.ajax({
+                        url: `${API_BASE_URL}/task/${taskId}`,
+                        method: 'DELETE',
+                        success: function() {
+                            loadRecentTasks();
+                        },
+                        error: function() {
+                            showError('Delete Failed', 'Failed to delete task');
+                        }
+                    });
+                }
+            });
+
+            // Add session cleanup on page unload
+            let cleanupExecuted = false;
+            
+            function executeCleanup() {
+                if (!cleanupExecuted) {
+                    cleanupExecuted = true;
+                    // Clear any running intervals first
+                    if (statusCheckInterval) {
+                        clearInterval(statusCheckInterval);
+                    }
+                    // Clean up session files when user leaves
+                    navigator.sendBeacon(API_BASE_URL + '/cleanup-session', JSON.stringify({}));
+                }
+            }
+            
+            window.addEventListener('beforeunload', function(e) {
+                executeCleanup();
+            });
+
+            // Also cleanup on page visibility change (when tab is closed)
+            // But add a delay to prevent cleanup when just switching tabs
+            let visibilityTimeout;
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'hidden') {
+                    // Set a timeout to cleanup after 30 seconds of being hidden
+                    visibilityTimeout = setTimeout(() => {
+                        executeCleanup();
+                    }, 30000); // 30 seconds delay
+                } else if (document.visibilityState === 'visible') {
+                    // Cancel cleanup if user comes back to the tab
+                    if (visibilityTimeout) {
+                        clearTimeout(visibilityTimeout);
+                        visibilityTimeout = null;
+                    }
+                }
+            });
+
+        });
+    </script>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+</body>
+</html>

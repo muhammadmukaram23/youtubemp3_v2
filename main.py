@@ -262,6 +262,106 @@ VIDEO_QUALITY_SETTINGS = {
 }
 
 # Helper functions
+def get_enhanced_ydl_opts(base_opts: dict = None) -> dict:
+    """Get enhanced yt-dlp options with multiple fallback strategies"""
+    if base_opts is None:
+        base_opts = {}
+    
+    enhanced_opts = {
+        'no_warnings': True,
+        'noplaylist': True,
+        'retries': 5,
+        'fragment_retries': 5,
+        'retry_sleep_functions': {'http': lambda n: min(2 ** n, 10)},
+        'sleep_interval': 1,
+        'max_sleep_interval': 5,
+        'sleep_interval_requests': 1,
+        # Enhanced headers to better mimic a real browser
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
+        },
+        # Additional options to bypass restrictions
+        'extractor_args': {
+            'youtube': {
+                'skip': ['dash', 'hls'],
+                'player_skip': ['configs'],
+                'player_client': ['android', 'web'],
+            }
+        },
+        'embed_subs': False,
+        'age_limit': None,
+    }
+    
+    # Try to add cookies from browser, but don't fail if it doesn't work
+    try:
+        enhanced_opts['cookiesfrombrowser'] = ('chrome', None, None, None)
+    except Exception:
+        logger.warning("Could not load cookies from Chrome, continuing without cookies")
+    
+    # Merge with base options
+    enhanced_opts.update(base_opts)
+    
+    return enhanced_opts
+
+async def extract_with_fallback(url: str, download: bool = False) -> dict:
+    """Extract video info with multiple fallback strategies"""
+    strategies = [
+        # Strategy 1: Basic Googlebot options (Most successful - try first!)
+        lambda: {
+            'no_warnings': True,
+            'noplaylist': True,
+            'retries': 3,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+            }
+        },
+        
+        # Strategy 2: Full enhanced options with cookies
+        lambda: get_enhanced_ydl_opts(),
+        
+        # Strategy 3: Enhanced options without cookies
+        lambda: get_enhanced_ydl_opts({'cookiesfrombrowser': None}),
+        
+        # Strategy 4: Android client only
+        lambda: get_enhanced_ydl_opts({
+            'cookiesfrombrowser': None,
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android'],
+                }
+            }
+        })
+    ]
+    
+    for i, strategy in enumerate(strategies):
+        try:
+            opts = strategy()
+            logger.info(f"Trying extraction strategy {i + 1} for URL: {url}")
+            
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(url, download=download)
+                logger.info(f"Strategy {i + 1} successful!")
+                return info
+                
+        except Exception as e:
+            logger.warning(f"Strategy {i + 1} failed: {str(e)}")
+            if i == len(strategies) - 1:  # Last strategy
+                raise Exception(f"All extraction strategies failed. Last error: {str(e)}")
+            continue
+    
+    raise Exception("All extraction strategies failed")
+
 def clean_youtube_url(url: str) -> str:
     """Remove playlist parameters from YouTube URL to get single video"""
     try:
@@ -298,28 +398,17 @@ def get_ydl_opts(quality: AudioQuality, output_path: str, start_time: int = None
         'extractaudio': True,
         'audioformat': 'mp3',
         'noplaylist': True,  # Only download single video, ignore playlist
-        # Add user agent and other headers to bypass bot detection
+        # Use Googlebot User-Agent as primary (most successful)
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-us,en;q=0.5',
-            'Accept-Encoding': 'gzip,deflate',
-            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
-            'Keep-Alive': '115',
-            'Connection': 'keep-alive',
+            'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
         },
-        # Additional options to bypass restrictions
-        'extractor_args': {
-            'youtube': {
-                'skip': ['dash', 'hls'],
-                'player_skip': ['configs'],
-            }
-        },
-        # Use embedded player to avoid some restrictions
-        'embed_subs': False,
-        'age_limit': None,
-        'retries': 3,
-        'fragment_retries': 3,
+        'retries': 5,
+        'fragment_retries': 5,
+        'retry_sleep_functions': {'http': lambda n: 2 ** n},
+        # Add more options to avoid bot detection
+        'sleep_interval': 1,
+        'max_sleep_interval': 5,
+        'sleep_interval_requests': 1,
     }
     
     # Add FFmpeg path if configured
@@ -347,6 +436,17 @@ def get_video_ydl_opts(quality: VideoQuality, output_path: str, start_time: int 
         'format': VIDEO_QUALITY_SETTINGS[quality]['format'],
         'no_warnings': True,
         'noplaylist': True,  # Only download single video, ignore playlist
+        # Use Googlebot User-Agent as primary (most successful)
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        },
+        'retries': 5,
+        'fragment_retries': 5,
+        'retry_sleep_functions': {'http': lambda n: 2 ** n},
+        # Add more options to avoid bot detection
+        'sleep_interval': 1,
+        'max_sleep_interval': 5,
+        'sleep_interval_requests': 1,
     }
     
     # Add FFmpeg path if configured
@@ -790,11 +890,10 @@ async def download_video(task_id: str, url: str, quality: AudioQuality, start_ti
         
         # First get video info to store title early
         try:
-            with yt_dlp.YoutubeDL({'no_warnings': True, 'noplaylist': True}) as ydl:
-                info = ydl.extract_info(clean_url, download=False)
-                video_title = info.get('title', 'Unknown')
-                tasks[task_id]['title'] = video_title
-                logger.info(f"Video title: {video_title}")
+            info = await extract_with_fallback(clean_url, download=False)
+            video_title = info.get('title', 'Unknown')
+            tasks[task_id]['title'] = video_title
+            logger.info(f"Video title: {video_title}")
         except Exception as e:
             logger.warning(f"Could not get video title: {str(e)}")
             video_title = 'Unknown'
@@ -819,7 +918,7 @@ async def download_video(task_id: str, url: str, quality: AudioQuality, start_ti
         output_filename = f"{task_id}.%(ext)s"
         output_path = str(temp_dir / output_filename)
         
-        # More reliable download options with bot detection bypass
+        # More reliable download options with enhanced bot detection bypass
         ydl_opts = {
             'outtmpl': output_path,
             'format': 'bestaudio/best',
@@ -832,28 +931,41 @@ async def download_video(task_id: str, url: str, quality: AudioQuality, start_ti
             'writesubtitles': False,
             'writeautomaticsub': False,
             'ignoreerrors': False,
-            'retries': 3,
-            'fragment_retries': 3,
-            # Add user agent and other headers to bypass bot detection
+            'retries': 5,
+            'fragment_retries': 5,
+            'retry_sleep_functions': {'http': lambda n: 2 ** n},
+            # Enhanced headers to better mimic a real browser
             'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-us,en;q=0.5',
-                'Accept-Encoding': 'gzip,deflate',
-                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
-                'Keep-Alive': '115',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'DNT': '1',
                 'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Cache-Control': 'max-age=0',
             },
+            # Try to use cookies from browser if available
+            'cookiesfrombrowser': ('chrome', None, None, None),
             # Additional options to bypass restrictions
             'extractor_args': {
                 'youtube': {
                     'skip': ['dash', 'hls'],
                     'player_skip': ['configs'],
+                    'player_client': ['android', 'web'],
                 }
             },
             # Use embedded player to avoid some restrictions
             'embed_subs': False,
             'age_limit': None,
+            # Add more options to avoid bot detection
+            'sleep_interval': 1,
+            'max_sleep_interval': 5,
+            'sleep_interval_requests': 1,
         }
         
         # Add FFmpeg path if configured
@@ -867,21 +979,60 @@ async def download_video(task_id: str, url: str, quality: AudioQuality, start_ti
         download_success = False
         max_retries = 2
         
-        for attempt in range(max_retries + 1):
+        # Try enhanced download with fallback strategies
+        download_strategies = [
+            # Strategy 1: Basic Googlebot options (Most successful - try first!)
+            lambda: {
+                'outtmpl': ydl_opts['outtmpl'],
+                'format': 'bestaudio/best',
+                'no_warnings': True,
+                'noplaylist': True,
+                'progress_hooks': [progress_hook],
+                'retries': 3,
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+                }
+            },
+            
+            # Strategy 2: Use the enhanced options we already configured
+            lambda: ydl_opts,
+            
+            # Strategy 3: Enhanced options without cookies
+            lambda: {**ydl_opts, 'cookiesfrombrowser': None},
+            
+            # Strategy 4: Android client only
+            lambda: {
+                **ydl_opts,
+                'cookiesfrombrowser': None,
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['android'],
+                    }
+                }
+            }
+        ]
+        
+        for strategy_idx, strategy in enumerate(download_strategies):
             try:
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                current_opts = strategy()
+                logger.info(f"Trying download strategy {strategy_idx + 1}")
+                
+                with yt_dlp.YoutubeDL(current_opts) as ydl:
                     # Add task_id to the progress hook context
                     ydl._progress_hooks[0] = lambda d: progress_hook({**d, 'task_id': task_id})
                     ydl.download([clean_url])
+                    
                 download_success = True
+                logger.info(f"Download strategy {strategy_idx + 1} successful!")
                 break
+                
             except Exception as e:
-                logger.error(f"Download attempt {attempt + 1} failed: {str(e)}")
-                if attempt < max_retries:
-                    tasks[task_id]['message'] = f'Download failed, retrying... (attempt {attempt + 2})'
-                    await asyncio.sleep(2)  # Wait before retry
+                logger.error(f"Download strategy {strategy_idx + 1} failed: {str(e)}")
+                if strategy_idx == len(download_strategies) - 1:  # Last strategy
+                    raise Exception(f"All download strategies failed. Last error: {str(e)}")
                 else:
-                    raise Exception(f"Download failed after {max_retries + 1} attempts: {str(e)}")
+                    tasks[task_id]['message'] = f'Download failed, trying alternative method... (strategy {strategy_idx + 2})'
+                    await asyncio.sleep(2)  # Wait before trying next strategy
         
         if download_success:
             tasks[task_id]['progress'] = 70.0
@@ -1073,11 +1224,10 @@ async def download_video_mp4(task_id: str, url: str, quality: VideoQuality, star
         
         # First get video info to store title early
         try:
-            with yt_dlp.YoutubeDL({'no_warnings': True, 'noplaylist': True}) as ydl:
-                info = ydl.extract_info(clean_url, download=False)
-                video_title = info.get('title', 'Unknown')
-                tasks[task_id]['title'] = video_title
-                logger.info(f"Video title: {video_title}")
+            info = await extract_with_fallback(clean_url, download=False)
+            video_title = info.get('title', 'Unknown')
+            tasks[task_id]['title'] = video_title
+            logger.info(f"Video title: {video_title}")
         except Exception as e:
             logger.warning(f"Could not get video title: {str(e)}")
             video_title = 'Unknown'
@@ -1268,42 +1418,18 @@ async def get_qualities():
 async def get_video_info(url: str = Query(..., description="YouTube video URL")):
     """Get video information without downloading"""
     try:
-        ydl_opts = {
-            'no_warnings': True, 
-            'noplaylist': True,
-            # Add user agent and other headers to bypass bot detection
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-us,en;q=0.5',
-                'Accept-Encoding': 'gzip,deflate',
-                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
-                'Keep-Alive': '115',
-                'Connection': 'keep-alive',
-            },
-            # Additional options to bypass restrictions
-            'extractor_args': {
-                'youtube': {
-                    'skip': ['dash', 'hls'],
-                    'player_skip': ['configs'],
-                }
-            },
-            'embed_subs': False,
-            'age_limit': None,
-        }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            
-            return VideoInfo(
-                id=info.get('id', ''),
-                title=info.get('title', 'Unknown'),
-                duration=info.get('duration', 0),
-                uploader=info.get('uploader', 'Unknown'),
-                view_count=info.get('view_count', 0),
-                upload_date=info.get('upload_date', ''),
-                thumbnail=info.get('thumbnail', ''),
-                description=info.get('description', '')[:500] + ('...' if len(info.get('description', '')) > 500 else '')
-            )
+        info = await extract_with_fallback(url, download=False)
+        
+        return VideoInfo(
+            id=info.get('id', ''),
+            title=info.get('title', 'Unknown'),
+            duration=info.get('duration', 0),
+            uploader=info.get('uploader', 'Unknown'),
+            view_count=info.get('view_count', 0),
+            upload_date=info.get('upload_date', ''),
+            thumbnail=info.get('thumbnail', ''),
+            description=info.get('description', '')[:500] + ('...' if len(info.get('description', '')) > 500 else '')
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to get video info: {str(e)}")
 
